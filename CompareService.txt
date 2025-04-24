@@ -1,0 +1,107 @@
+$CurrentService = @()
+$CurrentServiceRunning = @()
+$CurrentServiceNoSpecialChar = @()
+$CurrentServiceRunningNoSpecialChar = @()
+$SpecialServiceRunning = @()
+$DefaultService = @()
+$DefaultServiceRunning = @()
+$DefaultSpecialService = @()
+$DefaultSpecialServiceNoRunning = @()
+
+$DefaultService= @('AarSvc','AJRouter','ALG','AppIDSvc','Appinfo','AppMgmt','AppReadiness','AppVClient','AppXSvc','AssignedAccessManagerSvc',`
+'AudioEndpointBuilder','Audiosrv','autotimesvc','AxInstSV','BcastDVRUserService','BDESVC','BFE','BITS','BluetoothUserService',`
+'BrokerInfrastructure','BTAGService','BthAvctpSvc','bthserv','camsvc','CaptureService','cbdhsvc','CDPSvc','CDPUserSvc',`
+'CertPropSvc','ClipSVC','COMSysApp','ConsentUxUserSvc','CoreMessagingRegistrar','CredentialEnrollmentManagerUserSvc','CryptSvc',`
+'CscService','DcomLaunch','defragsvc','DeviceAssociationBrokerSvc','DeviceAssociationService','DeviceInstall','DevicePickerUserSvc',`
+'DevicesFlowUserSvc','DevQueryBroker','Dhcp','diagnosticshub.standardcollector.service','diagsvc','DiagTrack','DispBrokerDesktopSvc',`
+'DisplayEnhancementService','DmEnrollmentSvc','dmwappushservice','Dnscache','DoSvc','dot3svc','DPS','DsmSvc','DsSvc','DusmSvc','Eaphost','EFS',`
+'embeddedmode','EntAppSvc','EventLog','EventSystem','Fax','fdPHost','FDResPub','fhsvc','FontCache','FrameServer','gpsvc','GraphicsPerfSvc','hidserv',`
+'HvHost','icssvc','IKEEXT','InstallService','iphlpsvc','IpxlatCfgSvc','KeyIso','KtmRm','LanmanServer','LanmanWorkstation','lfsvc','LicenseManager',`
+'lltdsvc','lmhosts','LSM','LxpSvc','MapsBroker','MessagingService','mpssvc','MSDTC','MSiSCSI','msiserver','NaturalAuthentication','NcaSvc','NcbService',`
+'NcdAutoSetup','Netlogon','Netman','netprofm','NetSetupSvc','NetTcpPortSharing','NgcCtnrSvc','NgcSvc','NlaSvc','nsi','OneSyncSvc','p2pimsvc','p2psvc',`
+'PcaSvc','PeerDistSvc','perceptionsimulation','PerfHost','PhoneSvc','PimIndexMaintenanceSvc','pla','PlugPlay','PNRPAutoReg','PNRPsvc','PolicyAgent',`
+'Power','PrintNotify','PrintWorkflowUserSvc','ProfSvc','PushToInstall','QWAVE','RasAuto','RasMan','RemoteAccess','RemoteRegistry','RetailDemo','RmSvc',`
+'RpcEptMapper','RpcLocator','RpcSs','SamSs','SCardSvr','ScDeviceEnum','Schedule','SCPolicySvc','SDRSVC','seclogon','SecurityHealthService','SEMgrSvc','SENS',`
+'Sense','SensorDataService','SensorService','SensrSvc','SessionEnv','SgrmBroker','SharedAccess','SharedRealitySvc','ShellHWDetection','shpamsvc','smphost',`
+'SmsRouter','SNMPTRAP','spectrum','Spooler','sppsvc','SSDPSRV','ssh-agent','SstpSvc','StateRepository','stisvc','StorSvc','svsvc','swprv','SysMain','SystemEventsBroker',`
+'TabletInputService','TapiSrv','TermService','Themes','TieringEngineService','TimeBrokerSvc','TokenBroker','TrkWks','TroubleshootingSvc','TrustedInstaller','tzautoupdate',`
+'UevAgentService','UmRdpService','UnistoreSvc','upnphost','UserDataSvc','UserManager','UsoSvc','VacSvc','VaultSvc','vds','vmicguestinterface',`
+'vmicheartbeat','vmickvpexchange','vmicrdv','vmicshutdown','vmictimesync','vmicvmsession','vmicvss','VSS','W32Time','WaaSMedicSvc','WalletService',`
+'WarpJITSvc','wbengine','WbioSrvc','Wcmsvc','wcncsvc','WdiServiceHost','WdiSystemHost','WdNisSvc','WebClient','Wecsvc','WEPHOSTSVC','wercplsupport','WerSvc','WFDSConMgrSvc',`
+'WiaRpc','WinDefend','WinHttpAutoProxySvc','Winmgmt','WinRM','wisvc','WlanSvc','wlidsvc','wlpasvc','WManSvc','wmiApSrv','WMPNetworkSvc','workfolderssvc','WpcMonSvc',`
+'WPDBusEnum','WpnService','WpnUserService','wscsvc','WSearch','wuauserv','WwanSvc','XblAuthManager','XblGameSave','XboxGipSvc','XboxNetApiSvc')
+
+$DefaultServiceRunning= @('Appinfo','AudioEndpointBuilder','Audiosrv','BFE','BrokerInfrastructure','BthAvctpSvc','cbdhsvc',`
+'CDPSvc','CDPUserSvc','COMSysApp','CoreMessagingRegistrar','CryptSvc','DcomLaunch','Dhcp','DiagTrack','DispBrokerDesktopSvc',`
+'Dnscache','DPS','DusmSvc','EventLog','EventSystem','FontCache','InstallService','iphlpsvc','KeyIso','LanmanServer','LanmanWorkstation',`
+'lfsvc','LicenseManager','lmhosts','LSM','mpssvc','MSDTC','NcbService','netprofm','NlaSvc','nsi','OneSyncSvc','PcaSvc','PhoneSvc',`
+'PimIndexMaintenanceSvc','PlugPlay','Power','ProfSvc','RpcEptMapper','RpcSs','SamSs','Schedule','SecurityHealthService','SEMgrSvc',`
+'SENS','SgrmBroker','ShellHWDetection','SmsRouter','Spooler','SSDPSRV','StateRepository','StorSvc','SysMain','SystemEventsBroker','TabletInputService',`
+'Themes','TimeBrokerSvc','TokenBroker','TrkWks','UnistoreSvc','UserDataSvc','UserManager','UsoSvc','VaultSvc','WarpJITSvc',`
+'WbioSrvc','Wcmsvc','WdiServiceHost','WdNisSvc','WinDefend','WinHttpAutoProxySvc','Winmgmt','WpnService','WpnUserService','wscsvc','WSearch')
+
+$CurrentService = Get-WmiObject -Class win32_service 
+$CurrentServiceRunning = Get-WmiObject -Class win32_service  | Where-Object {$_.state -match "Run*"}
+$CurrentServiceNoSpecialChar = $CurrentService | ForEach-Object {                     
+       $res = $_
+       $ServiceName = $res.name
+        if ($ServiceName.IndexOf('_') -ge 0){                                       #判断服务名是否含有"_"符号，如果有则只保留"_"之前部分 如"dhcp_33a2"变为"dhcp"
+            $ServiceName.Substring(0, $ServiceName.IndexOf('_')) }                  # $RemoveSpecialChar = $res.name  -replace '[^a-zA-Z]', ''  #将服务名如 'AarSvc_3777a'变成 'AarSvca'，只保留字母部分
+        else { $ServiceName }
+      }
+
+$CurrentServiceRunningNoSpecialChar = $CurrentServiceRunning | ForEach-Object {                     
+       $res = $_
+       $ServiceName = $res.name
+        if ($ServiceName.IndexOf('_') -ge 0){                                       #判断服务名是否含有"_"符号，如果有则只保留"_"之前部分 如"dhcp_33a2"变为"dhcp"
+            $ServiceName.Substring(0, $ServiceName.IndexOf('_')) }                  # $RemoveSpecialChar = $res.name  -replace '[^a-zA-Z]', ''  #将服务名如 'AarSvc_3777a'变成 'AarSvca'，只保留字母部分
+        else { $ServiceName }
+      }
+
+$CurrentSpecialService = $CurrentService | ForEach-Object {                        #将现有服务与标准服务对比，找出不在标准服务中的服务
+     $res = $_
+     $ServiceName = $res.name
+     if ($ServiceName.IndexOf('_') -ge 0){                                         #判断服务名是否含有"_"符号，如果有则只保留"_"之前部分 如"dhcp_33a2"变为"dhcp"
+       $RemoveSpecialChar = $ServiceName.Substring(0, $ServiceName.IndexOf('_')) } # $RemoveSpecialChar = $res.name  -replace '[^a-zA-Z]', ''  #将服务名如 'AarSvc_3777a'变成 'AarSvca'，只保留字母部分
+     else { $RemoveSpecialChar = $ServiceName }
+
+     $Match = $DefaultService | Where-Object {$_ -like $RemoveSpecialChar}         #判断现有服务与标准服务是否一致，如果一致将标准服务记录到$Match
+     
+     if ( ($Match -eq $NULL) ) {                                                   #如果$Match为空，打印现有不在标准服务中的服务
+         $res | Select-Object @{n="Status"; e={$res.State}}, @{n="ServiceName";e={$res.Name}}, @{n="DisplayName";e={$res.DisplayName}},@{n="ServicePath";e={$res.PathName}} }
+  }
+
+  $DefaultSpecialService= $DefaultService | ForEach-Object {                       #将现有服务与标准服务对比，找出标准服务不在现有服务中的服务
+     $res1 = $_
+     $Match1 = $CurrentServiceNoSpecialChar | Where-Object {$_ -like $res1}        #判断标准服务和现有服务是否一致，如果一致将现有服务记录到$Match
+     if ( ($Match1 -eq $NULL) ) { $res1 }                                          #如果$Match为空，打印标准服务不在现有服务中的服务
+  }
+
+$CurrentSpecialServiceRunning= $CurrentServiceRunning | ForEach-Object {           #将正在运行的服务与标准服务对比，找出不在标准服务中正在运行的服务
+     $res = $_
+     $ServiceName = $res.name
+     if ($ServiceName.IndexOf('_') -ge 0){                                         #判断服务名是否含有"_"符号，如果有则只保留"_"之前部分 如"dhcp_33a2"变为"dhcp"
+       $RemoveSpecialChar = $ServiceName.Substring(0, $ServiceName.IndexOf('_')) } # $RemoveSpecialChar = $res.name  -replace '[^a-zA-Z]', ''  #将服务名如 'AarSvc_3777a'变成 'AarSvca'，只保留字母部分
+     else { $RemoveSpecialChar = $ServiceName }
+     $Match = $DefaultServiceRunning | Where-Object {$_ -like $RemoveSpecialChar}  #判断正在运行的服务和默认标准服务是否一致，如果一致将默认标准服务记录到$Match
+     
+     if ( ($Match -eq $NULL) ) {                                                   #如果$Match为空，打印不在标准服务中正在运行的服务
+         $res | Select-Object @{n="Status"; e={$res.State}}, @{n="ServiceName";e={$res.Name}}, @{n="DisplayName";e={$res.DisplayName}},@{n="ServicePath";e={$res.PathName}} }
+  }
+
+  $DefaultSpecialServiceNoRunning= $DefaultServiceRunning | ForEach-Object {       #将正在运行的服务与标准服务对比，找出标准服务应当运行而未运行的服务
+     $res1 = $_
+     $Match1 = $CurrentServiceRunningNoSpecialChar | Where-Object {$_ -like $res1} #判断默认标准服务和正在运行的服务是否一致，如果一致将正在运行的服务记录到$Match
+     
+     if ( ($Match1 -eq $NULL) ) { $res1 }                                          #如果$Match为空，打印不在正在运行服务中的默认标准服务
+  }
+
+Cls;"***将现有服务与标准服务对比，找出不在标准服务中的服务***"
+$CurrentSpecialService
+"";"***将现有服务与标准服务对比，找出标准服务不在现有服务中的服务***"
+$DefaultSpecialService
+
+"";"***将正在运行的服务与标准服务对比，找出不在标准服务中正在运行的服务***"
+$CurrentSpecialServiceRunning
+"";"***将正在运行的服务与标准服务对比，找出标准服务应当运行而未运行的服务***"
+$DefaultSpecialServiceNoRunning
