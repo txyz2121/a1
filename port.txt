@@ -1,0 +1,42 @@
+#========================================= 查找监听Port或已连接Port相关信息 ================================================
+cls
+$t1= Get-NetTCPConnection | Where-Object {$_.State -match "estab*"} | Select-Object -Property OwningProcess,LocalPort
+$t2= Get-Process -IncludeUserName | Select-Object -Property id,name,starttime,username,path
+
+$t3= $t1 | foreach {
+     $res = $_
+     $match = $t2 | where {$_.Id -eq $res.OwningProcess} 
+    if ($match -ne $NULL) {
+       "" | select @{n="ID";e={$match.id}}, @{n="name";e={$match.name}}, @{n="LocalPort";e={$res.LocalPort}},@{n="StartTime";e={$match.starttime}},@{n="user";e={$match.username}}, @{n="path";e={$match.path}}
+    }
+}
+     
+$t3 | Sort-Object -Property Localport | Format-Table
+
+
+netstat -an | find "LISTENING" | find "TCP" | find /V "[::]"
+
+
+#========================================= 根据用户名和程序名 查询某程序 ====================================================
+cls
+$UserName    = "*Admin*"      # 需要查询的用户
+$ProcessName = "*Lbo*"                   # 需要查询的程序
+$t1 = Get-Process -IncludeUserName | Select-Object -Property id,name,starttime,username,path
+$t2 = $t1 | ForEach-Object{
+      if ($_.UserName  -like $UserName -and $_.name -like $ProcessName ){
+      $_ | select @{n="ID";e={$_.id}}, @{n="Name";e={$_.name}}, @{n="StartTime";e={$_.starttime}},@{n="user";e={$_.UserName}}, @{n="Path";e={$_.path}}
+   }}
+
+$t2 | Sort-Object -Property StartTime | Format-Table
+
+# 结束某进程
+# Stop-Process -Id 11516     
+
+
+#=============================================================================================================================
+wmic process where "name='notepad.exe'" get ExecutablePath                #查找程序路径
+(get-process -name notepad).path                                          
+
+wmic service where "name='winrm'" get PathName                            #查找服务路径
+(Get-WmiObject Win32_Service -Filter "name Like 'winrm'").pathname        
+     
